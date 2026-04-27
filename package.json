@@ -1,0 +1,12 @@
+{
+  "name": "cooked-den",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Recipe enhancement app — paste any recipe URL, strip the ads, save it forever, add cost, nutrition, and cooking mode.",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
