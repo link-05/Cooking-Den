@@ -173,6 +173,33 @@ The smartest sequence — each step gives you something working before adding th
 
 ---
 
+## Working style
+
+Before writing any code, always explain:
+- **What** you're about to build (files, structure)
+- **Why** it exists and what problem it solves
+- **How** it fits into the build order and what the next step builds on top of it
+
+Keep the explanation concise but educational — the user is learning the stack as we build. Use plain language. Cover the key concept (e.g. what a Route Handler is, why we mock before building real) so the user understands the pattern, not just the output.
+
+Wait for the user to confirm before starting.
+
+When the user says they are closing or ending the session, immediately update the project memory in `~/.claude/projects/-Users-linke-Documents-Cooked-Den/memory/project_scaffold.md` with: steps completed this session, current progress in the build order, what's next, and any new files or conventions introduced. No need to ask — just do it.
+
+After the step is complete, append the explanation to `step_learning.md` at the repo root. Each entry should follow this format:
+
+```
+## Step N: Title
+
+### Concept name
+Explanation...
+
+### Files created
+- path — what it does
+```
+
+---
+
 ## Things to remember
 
 - Recipe content is stored privately per user, not republished. Stay clearly on the personal-use side of fair use (similar to Pocket).
