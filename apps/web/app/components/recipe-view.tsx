@@ -23,6 +23,22 @@ function TimerBadge({ timer }: { timer: StepTimer }) {
 
 export default function RecipeView({ recipe }: { recipe: Recipe }) {
   return (
+		<>
+			<Link
+				href="/library"
+				className="inline-flex items-center gap-1 text-sm text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+			>
+			<svg
+				className="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+				strokeWidth={2}
+			>
+				<path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+			</svg>
+			Library
+		</Link>
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
       {/* Header */}
       <div className="mb-8 flex flex-col gap-3">
@@ -126,5 +142,6 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
         </Link>
       </div>
     </div>
+		</>
   );
 }

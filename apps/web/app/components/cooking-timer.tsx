@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { StepTimer } from "@/lib/types";
 
-type Phase = "idle" | "prep" | "running" | "expired" | "done";
+type Phase = "idle" | "prep" | "running" | "paused" | "expired" | "done";
 
 interface Props {
   timer: StepTimer;
@@ -26,6 +26,7 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
 
   const phaseDurationRef = useRef<number>(0);
   const startedAtRef = useRef<number | null>(null);
+  const pausedFromRef = useRef<"prep" | "running" | null>(null);
 
   function beginPhase(p: "prep" | "running") {
     const duration =
@@ -45,6 +46,7 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
   function handleReset() {
     startedAtRef.current = null;
     phaseDurationRef.current = 0;
+    pausedFromRef.current = null;
     setRemaining(timer.duration_seconds);
     setPhase("idle");
   }
@@ -52,6 +54,30 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
   function handleContinue() {
     setPhase("done");
     onComplete?.();
+  }
+
+  function handlePause() {
+    if (phase !== "prep" && phase !== "running") return;
+    pausedFromRef.current = phase;
+    startedAtRef.current = null;
+    setPhase("paused");
+  }
+
+  function handleResume() {
+    const resumeTo = pausedFromRef.current;
+    if (!resumeTo) return;
+    phaseDurationRef.current = remaining;
+    startedAtRef.current = Date.now();
+    pausedFromRef.current = null;
+    setPhase(resumeTo);
+  }
+
+  function handleSkipPrep() {
+    if (phase !== "prep") return;
+    phaseDurationRef.current = timer.duration_seconds;
+    startedAtRef.current = Date.now();
+    setRemaining(timer.duration_seconds);
+    setPhase("running");
   }
 
   useEffect(() => {
@@ -93,6 +119,7 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
 
   const isPrep = phase === "prep";
   const isRunning = phase === "running";
+  const isPaused = phase === "paused";
   const isDone = phase === "done";
   const isExpired = phase === "expired";
 
@@ -100,23 +127,31 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
     ? "border-amber-400"
     : isRunning
       ? "border-orange-500"
-      : isDone
-        ? "border-emerald-500"
-        : isExpired
-          ? "border-rose-500"
-          : "border-zinc-300 dark:border-zinc-700";
+      : isPaused
+        ? "border-zinc-400 dark:border-zinc-500"
+        : isDone
+          ? "border-emerald-500"
+          : isExpired
+            ? "border-rose-500"
+            : "border-zinc-300 dark:border-zinc-700";
 
   const labelColor = isDone
     ? "text-emerald-600 dark:text-emerald-400"
     : isExpired
       ? "text-rose-600 dark:text-rose-400"
-      : "text-zinc-600 dark:text-zinc-300";
+      : isPaused
+        ? "text-zinc-500 dark:text-zinc-400"
+        : "text-zinc-600 dark:text-zinc-300";
+
+  const headerLabel = isPrep
+    ? `Get ready · ${timer.label}`
+    : isPaused
+      ? `Paused · ${timer.label}`
+      : timer.label;
 
   return (
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-      <div className={`text-sm font-medium ${labelColor}`}>
-        {isPrep ? `Get ready · ${timer.label}` : timer.label}
-      </div>
+      <div className={`text-sm font-medium ${labelColor}`}>{headerLabel}</div>
 
       <div
         className={`flex h-32 w-32 items-center justify-center rounded-full border-4 ${ringColor} transition-colors`}
@@ -126,7 +161,7 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
         </span>
       </div>
 
-      <div className="flex h-9 items-center gap-2">
+      <div className="flex min-h-9 flex-wrap items-center justify-center gap-2">
         {phase === "idle" && (
           <button
             onClick={handleStart}
@@ -136,13 +171,61 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
           </button>
         )}
 
-        {(isPrep || isRunning) && (
-          <button
-            onClick={handleReset}
-            className="rounded-full border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
-          >
-            Reset
-          </button>
+        {isPrep && (
+          <>
+            <button
+              onClick={handleSkipPrep}
+              className="rounded-full bg-orange-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-orange-600"
+            >
+              Skip prep
+            </button>
+            <button
+              onClick={handlePause}
+              className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            >
+              Pause
+            </button>
+            <button
+              onClick={handleReset}
+              className="rounded-full px-2 py-2 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-200"
+            >
+              Reset
+            </button>
+          </>
+        )}
+
+        {isRunning && (
+          <>
+            <button
+              onClick={handlePause}
+              className="rounded-full bg-orange-500 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-600"
+            >
+              Pause
+            </button>
+            <button
+              onClick={handleReset}
+              className="rounded-full border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            >
+              Reset
+            </button>
+          </>
+        )}
+
+        {isPaused && (
+          <>
+            <button
+              onClick={handleResume}
+              className="rounded-full bg-orange-500 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-600"
+            >
+              Resume
+            </button>
+            <button
+              onClick={handleReset}
+              className="rounded-full border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            >
+              Reset
+            </button>
+          </>
         )}
 
         {isExpired && (

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import RecipeCard from "@/app/components/recipe-card";
+import AddRecipeTile from "@/app/components/add-recipe-tile";
 import { useLibrary } from "@/lib/hooks/use-library";
 
 export default function LibraryPage() {
@@ -132,19 +132,7 @@ export default function LibraryPage() {
 
       {/* Main content */}
       <main className="flex-1 p-6">
-        {recipes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
-            <p className="text-zinc-500 dark:text-zinc-400">
-              No recipes saved yet.
-            </p>
-            <Link
-              href="/"
-              className="text-sm font-medium text-orange-500 hover:text-orange-600"
-            >
-              Save your first recipe →
-            </Link>
-          </div>
-        ) : filteredRecipes.length === 0 ? (
+        {activeCollectionId !== null && filteredRecipes.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-24 text-center">
             <p className="text-zinc-500 dark:text-zinc-400">
               No recipes in this collection yet.
@@ -155,6 +143,7 @@ export default function LibraryPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {activeCollectionId === null && <AddRecipeTile />}
             {filteredRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
