@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { parseUrl } from "@/lib/api";
 import * as store from "@/lib/store";
-import type { ParseResponse } from "@/lib/types";
 
 export default function UrlInput() {
   const router = useRouter();
@@ -19,18 +19,7 @@ export default function UrlInput() {
     setError(null);
 
     try {
-      const res = await fetch("/api/parse", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error((data as { error?: string }).error ?? "Failed to parse recipe");
-      }
-
-      const { recipe }: ParseResponse = await res.json();
+      const { recipe } = await parseUrl(url.trim());
       sessionStorage.setItem(`recipe_${recipe.id}`, JSON.stringify(recipe));
       store.saveRecipe(recipe);
       router.push(`/recipe/${recipe.id}`);

@@ -1,4 +1,4 @@
-# Cooked Den API
+# Cooking Den API
 
 FastAPI service for parsing and storing recipes.
 

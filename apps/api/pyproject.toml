@@ -1,7 +1,7 @@
 [project]
-name = "cooked-den-api"
+name = "cooking-den-api"
 version = "0.1.0"
-description = "Cooked Den parsing + storage API"
+description = "Cooking Den parsing + storage API"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",

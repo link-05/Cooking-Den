@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routers import parse
 
-app = FastAPI(title="Cooked Den API")
+app = FastAPI(title="Cooking Den API")
 
 app.add_middleware(
     CORSMiddleware,

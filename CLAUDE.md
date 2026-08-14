@@ -1,4 +1,4 @@
-# Cooked-Den
+# Cooking-Den
 
 A recipe enhancement app. Users paste any recipe URL, the app strips the ads, saves it forever, and layers on cost estimation, nutrition analysis, and a dedicated cooking mode. Think Pocket, but for recipes — with extra features the original sites don't have.
 

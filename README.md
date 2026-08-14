@@ -1,8 +1,8 @@
-# Cooked-Den
+# Cooking-Den
 
 Paste any recipe URL. The app strips the ads, saves it forever, and adds cost, nutrition, and a dedicated cooking mode.
 
-See [`CLAUDE.md`](./CLAUDE.md) for the full architecture, schema, and build plan.
+Claude used to create the starting scaffold for the website.
 
 ## Getting started
 
