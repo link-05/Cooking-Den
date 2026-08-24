@@ -1,18 +1,25 @@
 "use client";
 
+// Import react hooks
 import { useEffect, useRef, useState } from "react";
+// Import Typescript interface for the timer
 import type { StepTimer } from "@/lib/types";
 
+// The union type Phase state 
 type Phase = "idle" | "prep" | "running" | "paused" | "expired" | "done";
 
+// Structure for a timer 
 interface Props {
-  timer: StepTimer;
-  onStart?: () => void;
-  onComplete?: () => void;
+	timer: StepTimer;
+	// Optional method property
+	onStart?: () => void;
+	onComplete?: () => void;
 }
 
+// Buffer time before timer expires
 const GRACE_SECONDS = 60;
 
+// Clocking formatting - convert to whole seconds, Get floored minutes, get 2 values of remainder.
 function formatClock(seconds: number): string {
   const s = Math.max(0, Math.ceil(seconds));
   const m = Math.floor(s / 60);
@@ -20,14 +27,17 @@ function formatClock(seconds: number): string {
   return `${m}:${r.toString().padStart(2, "0")}`;
 }
 
+// React Component, destructure input object, matching dt and shape of Props : use dot notation as another option
 export default function CookingTimer({ timer, onStart, onComplete }: Props) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [remaining, setRemaining] = useState<number>(timer.duration_seconds);
 
+	// Setup time 
   const phaseDurationRef = useRef<number>(0);
   const startedAtRef = useRef<number | null>(null);
   const pausedFromRef = useRef<"prep" | "running" | null>(null);
 
+	// Either in prep or running
   function beginPhase(p: "prep" | "running") {
     const duration =
       p === "prep" ? timer.prep_buffer_seconds : timer.duration_seconds;
@@ -82,17 +92,18 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
 
   useEffect(() => {
     if (phase !== "prep" && phase !== "running") return;
-
+		// Update clock
     const tick = () => {
       if (startedAtRef.current === null) return;
       const elapsed = (Date.now() - startedAtRef.current) / 1000;
       const rem = phaseDurationRef.current - elapsed;
 
+			// Update UI exit tick if time is still running
       if (rem > 0) {
         setRemaining(rem);
         return;
       }
-
+			// If time at 0 then set to running
       if (phase === "prep") {
         // Inline prep → running transition so the effect stays self-contained.
         phaseDurationRef.current = timer.duration_seconds;
@@ -102,7 +113,7 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
         return;
       }
 
-      // running done
+      // Check remaining time, if over grace then expire otherwise done
       setRemaining(0);
       if (rem < -GRACE_SECONDS) {
         setPhase("expired");
@@ -112,8 +123,11 @@ export default function CookingTimer({ timer, onStart, onComplete }: Props) {
       }
     };
 
+		// Call tick to prevent delay
     tick();
+		// Run clock every quarter second
     const id = setInterval(tick, 250);
+		// Unmount to prevent memory leak
     return () => clearInterval(id);
   }, [phase, onComplete, timer.duration_seconds]);
 
